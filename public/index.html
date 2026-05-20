@@ -524,11 +524,11 @@
         <!-- Dynamic Disposable Email Display Area -->
         <section class="p-5 sm:p-6 md:p-8 shrink-0">
             <div class="max-w-[1200px] mx-auto">
-                <div class="p-6 md:p-8 rounded-2xl bg-gradient-to-tr from-brand-500/10 via-brand-600/5 to-transparent border border-slate-200/10 glow-accent flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
+                <div class="p-6 md:p-8 rounded-2xl bg-gradient-to-tr from-brand-500/10 via-brand-600/5 to-transparent border border-slate-200/10 glow-accent flex flex-col lg:flex-row justify-between items-center gap-6 relative overflow-hidden">
                     <div class="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-brand-500/10 blur-3xl"></div>
 
-                    <div class="min-w-0 space-y-2 text-center md:text-left w-full md:w-auto">
-                        <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3">
+                    <div class="min-w-0 space-y-2 text-center lg:text-left w-full lg:w-auto">
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
                             <span class="shrink-0 text-[10px] font-extrabold uppercase tracking-widest text-brand-500 font-mono">Your Temporary Address</span>
                             <div id="countdown-container" class="hidden items-center gap-1.5 text-[10px] font-bold text-indigo-500 dark:text-indigo-400 bg-brand-500/10 dark:bg-brand-500/20 px-2.5 py-0.5 rounded-full shrink-0 max-w-max border border-brand-500/10">
                                 <span class="material-symbols-outlined text-[14px] animate-pulse">hourglass_empty</span>
@@ -538,7 +538,7 @@
                         <div id="email-display-card" class="block w-full text-base sm:text-lg md:text-2xl font-black font-mono tracking-tight text-brand-500 select-all truncate">
                             Generating inbox...
                         </div>
-                        <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3">
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
                             <p class="text-[11px] text-slate-400/80">Inbox refreshes automatically. Data clears dynamically after expiry.</p>
                             <button id="extend-time-btn" class="hidden items-center gap-1 text-[10px] font-extrabold bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/30 px-2 py-0.5 rounded-lg transition-all cursor-pointer">
                                 <span class="material-symbols-outlined text-xs">add_circle</span> Extend +15m
@@ -546,13 +546,13 @@
                         </div>
                     </div>
 
-                    <div class="shrink-0 flex items-center gap-3 w-full md:w-auto justify-center">
-                        <button id="copy-email-btn" class="flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-all active:scale-[0.97] shadow-lg shadow-brand-500/20 cursor-pointer">
+                    <div class="shrink-0 flex items-center gap-3 w-full lg:w-auto justify-center">
+                        <button id="copy-email-btn" class="flex-1 lg:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-all active:scale-[0.97] shadow-lg shadow-brand-500/20 cursor-pointer">
                             <span id="copy-icon" class="material-symbols-outlined text-sm">content_copy</span>
                             <span id="copy-text">Copy Email</span>
                         </button>
 
-                        <button id="generate-random-btn" class="flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-500/5 border border-slate-200/10 hover:border-brand-500 hover:text-brand-500 font-bold text-xs transition-all active:scale-[0.97] cursor-pointer">
+                        <button id="generate-random-btn" class="flex-1 lg:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-500/5 border border-slate-200/10 hover:border-brand-500 hover:text-brand-500 font-bold text-xs transition-all active:scale-[0.97] cursor-pointer">
                             <span class="material-symbols-outlined text-sm">autorenew</span>
                             <span>New Random</span>
                         </button>
