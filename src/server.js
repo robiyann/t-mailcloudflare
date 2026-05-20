@@ -2,17 +2,18 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const swaggerUi = require('swagger-ui-express');
 const swaggerSpecs = require('./swagger');
 const queries = require('./db/queries');
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 3721;
 const API_KEY = process.env.API_KEY;
 
-// ─── CORS ────────────────────────────────────────────────────────────────────
-// Open - anyone can read their own mailbox if they know the address.
-// Only inbound writes are protected via INBOUND_SECRET.
+// ─── Security & CORS ──────────────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
 app.use(cors());
 
 // ─── Body parser ──────────────────────────────────────────────────────────────
@@ -20,11 +21,12 @@ app.use(express.json({ limit: '10mb' }));
 
 const { requireApiKey } = require('./utils/auth');
 
-// ─── Swagger Docs (public, user-facing only) ──────────────────────────────────
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: "ZYVENOX API"
-}));
+// ─── API Docs ─────────────────────────────────────────────────────────────────
+// Custom docs page at /docs (HTML); raw OpenAPI JSON at /docs/swagger.json
+app.get('/docs/swagger.json', (req, res) => res.json(swaggerSpecs));
+app.get('/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'docs.html'));
+});
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 // /api/inbound: protected by INBOUND_SECRET (only Cloudflare Worker can write)
@@ -32,9 +34,6 @@ app.use('/api/inbound', require('./routes/inbound'));
 // /api/mailboxes & /api/domains: public - security is the randomness of the address
 app.use('/api/domains', require('./routes/domains'));
 app.use('/api/mailboxes', require('./routes/mailbox'));
-// /api/luckyous: proxy to external luckyous API
-app.use('/api/luckyous', require('./routes/luckyous'));
-
 // ─── Static Web UI ────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -49,22 +48,23 @@ app.use((req, res, next) => {
     // Security is handled by the iframe 'sandbox' attribute blocking scripts.
     next();
 });
-
-app.get('/luckyousmail', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'luckyousmail.html'));
-});
-// ─── Auto-cleanup hourly ──────────────────────────────────────────────────────
+// ─── Auto-cleanup every 10 seconds ────────────────────────────────────────────
 setInterval(() => {
   try {
     const now = new Date().toISOString();
-    const result = queries.cleanupExpiredEmails.run({ now });
-    if (result.changes > 0) {
-      console.log(`[Cleanup] Deleted ${result.changes} expired emails.`);
+    const emailsRes = queries.cleanupExpiredEmails.run({ now });
+    const mailboxesRes = queries.cleanupExpiredMailboxes.run({ now });
+    
+    if (emailsRes.changes > 0) {
+      console.log(`[CLEANUP] Automatically deleted ${emailsRes.changes} expired emails at ${now}`);
+    }
+    if (mailboxesRes.changes > 0) {
+      console.log(`[CLEANUP] Automatically deleted ${mailboxesRes.changes} expired mailboxes at ${now}`);
     }
   } catch (err) {
-    console.error('[Cleanup] Error deleting expired emails:', err);
+    console.error('[CLEANUP] Failed to automatically clean up expired data:', err);
   }
-}, 60 * 60 * 1000);
+}, 10000);
 
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`🚀 CF Mail Server running on http://127.0.0.1:${PORT}`);

@@ -38,14 +38,13 @@ db.exec(`
     active INTEGER DEFAULT 1
   );
 
-  CREATE TABLE IF NOT EXISTS tokens (
-    token TEXT PRIMARY KEY,
-    address TEXT NOT NULL,
+  CREATE TABLE IF NOT EXISTS mailboxes (
+    address TEXT PRIMARY KEY,
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL
   );
-  CREATE INDEX IF NOT EXISTS idx_tokens_address ON tokens(address);
-  CREATE INDEX IF NOT EXISTS idx_tokens_expires_at ON tokens(expires_at);
+  CREATE INDEX IF NOT EXISTS idx_mailboxes_expires_at ON mailboxes(expires_at);
+
 `);
 
 // Seed domains from environment (Initial or updates)

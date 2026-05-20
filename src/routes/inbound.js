@@ -63,8 +63,26 @@ router.post('/', async (req, res) => {
     const id = crypto.randomUUID();
     const now = new Date();
     
-    const ttlHours = parseInt(process.env.EMAIL_TTL_HOURS || '24', 10);
-    const expiresAt = new Date(now.getTime() + ttlHours * 60 * 60 * 1000);
+    let expiresAtStr = '';
+    const mailbox = queries.getMailbox.get({ address });
+    if (mailbox) {
+      expiresAtStr = mailbox.expires_at;
+      // If mailbox is already expired, we do not store the email (reject it)
+      if (new Date(expiresAtStr) <= now) {
+        console.log(`[Inbound] Rejected email for expired mailbox: ${address}`);
+        return res.status(410).json({ error: 'Mailbox has expired' });
+      }
+    } else {
+      // Auto-register unregistered direct recipient with default 24h expiry
+      const ttlHours = parseInt(process.env.EMAIL_TTL_HOURS || '24', 10);
+      const expiresAt = new Date(now.getTime() + ttlHours * 60 * 60 * 1000);
+      expiresAtStr = expiresAt.toISOString();
+      queries.insertMailbox.run({
+        address,
+        created_at: now.toISOString(),
+        expires_at: expiresAtStr
+      });
+    }
 
     console.log(`[Inbound] Parsed email: subj="${parsed.subject}", bodyTextLen=${parsed.text?.length || 0}, bodyHtmlLen=${parsed.html?.length || 0}`);
 
@@ -79,7 +97,7 @@ router.post('/', async (req, res) => {
       body_html: parsed.html || '',
       raw: raw,
       received_at: now.toISOString(),
-      expires_at: expiresAt.toISOString()
+      expires_at: expiresAtStr
     });
 
     res.json({ success: true, id });

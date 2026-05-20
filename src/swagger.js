@@ -19,8 +19,12 @@ const options = {
     },
     servers: [
       {
+        url: 'https://mail.zyvenox.my.id/api',
+        description: 'Production',
+      },
+      {
         url: '/api',
-        description: 'API Server',
+        description: 'Current host',
       },
     ],
     tags: [

@@ -2,22 +2,38 @@ const express = require('express');
 const router = express.Router();
 const queries = require('../db/queries');
 const { requireApiKey } = require('../utils/auth');
+const { getCloudflareDomains } = require('../utils/cloudflare');
 
 /**
  * @swagger
  * /domains:
  *   get:
- *     summary: Get available domains
+ *     summary: Get all active domains
  *     tags: [Domains]
  *     responses:
  *       200:
- *         description: List of active domains
+ *         description: List of active domains, sourced from Cloudflare zones API (cached 5 min) or local DB fallback
+ *         content:
+ *           application/json:
+ *             example:
+ *               domains:
+ *                 - zyvenox.my.id
+ *                 - mail.zyvenox.my.id
+ *               source: cloudflare
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const domains = queries.getDomains.all().map(d => d.domain);
-    res.json({ domains });
+    // 1. Try to fetch dynamic domains from Cloudflare API
+    const cfDomains = await getCloudflareDomains();
+    if (cfDomains && cfDomains.length > 0) {
+      return res.json({ domains: cfDomains, source: 'cloudflare' });
+    }
+
+    // 2. Fallback: retrieve from SQLite database domains table
+    const dbDomains = queries.getDomains.all();
+    res.json({ domains: dbDomains.map(d => d.domain), source: 'local_db' });
   } catch (error) {
+    console.error('[Domains API] Error:', error);
     res.status(500).json({ error: 'Failed to fetch domains' });
   }
 });
@@ -26,7 +42,7 @@ router.get('/', (req, res) => {
  * @swagger
  * /domains:
  *   post:
- *     summary: Add or activate a domain
+ *     summary: Register a new domain
  *     tags: [Domains]
  *     security:
  *       - api_key: []
@@ -36,23 +52,42 @@ router.get('/', (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - domain
  *             properties:
  *               domain:
  *                 type: string
+ *                 example: zyvenox.my.id
+ *               label:
+ *                 type: string
+ *                 description: Optional human-readable label
+ *                 example: Primary mail domain
+ *           example:
+ *             domain: zyvenox.my.id
+ *             label: Primary mail domain
  *     responses:
- *       200:
- *         description: Domain added
- *       401:
- *         description: Unauthorized
+ *       201:
+ *         description: Domain registered or reactivated
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *       400:
+ *         description: Missing domain field
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Domain name is required
  */
 router.post('/', requireApiKey, (req, res) => {
-  const { domain } = req.body;
-  if (!domain) return res.status(400).json({ error: 'Domain is required' });
+  const { domain, label } = req.body;
+  if (!domain) return res.status(400).json({ error: 'Domain name is required' });
+
   try {
-    queries.upsertDomain.run({ domain: domain.toLowerCase().trim() });
-    res.json({ success: true, message: `Domain ${domain} added/activated` });
+    queries.upsertDomain.run({ domain: domain.toLowerCase().trim(), label: label || '' });
+    res.status(201).json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add domain' });
+    res.status(500).json({ error: 'Failed' });
   }
 });
 
@@ -60,7 +95,7 @@ router.post('/', requireApiKey, (req, res) => {
  * @swagger
  * /domains/bulk:
  *   post:
- *     summary: Bulk add multiple domains
+ *     summary: Register domains in bulk
  *     tags: [Domains]
  *     security:
  *       - api_key: []
@@ -70,34 +105,48 @@ router.post('/', requireApiKey, (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - domains
  *             properties:
  *               domains:
  *                 type: array
  *                 items:
  *                   type: string
+ *           example:
+ *             domains:
+ *               - zyvenox.my.id
+ *               - mail.zyvenox.my.id
+ *               - inbox.example.com
  *     responses:
- *       200:
- *         description: Domains added successfully
- *       401:
- *         description: Unauthorized
+ *       201:
+ *         description: All domains in the batch were upserted
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               count: 3
+ *       400:
+ *         description: domains field missing or not an array
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: List of domains is required
  */
 router.post('/bulk', requireApiKey, (req, res) => {
   const { domains } = req.body;
-  if (!Array.isArray(domains) || domains.length === 0) {
-    return res.status(400).json({ error: 'Array of domains is required' });
+  if (!domains || !Array.isArray(domains)) {
+    return res.status(400).json({ error: 'List of domains is required' });
   }
-  
+
   try {
-    let added = 0;
     for (const d of domains) {
-      if (typeof d === 'string' && d.trim()) {
-        queries.upsertDomain.run({ domain: d.trim().toLowerCase() });
-        added++;
+      if (typeof d === 'string' && d.trim().length > 0) {
+        queries.upsertDomain.run({ domain: d.toLowerCase().trim(), label: '' });
       }
     }
-    res.json({ success: true, message: `Successfully added ${added} domains` });
+    res.status(201).json({ success: true, count: domains.length });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add domains in bulk' });
+    res.status(500).json({ error: 'Failed' });
   }
 });
 
@@ -105,7 +154,7 @@ router.post('/bulk', requireApiKey, (req, res) => {
  * @swagger
  * /domains/{domain}:
  *   delete:
- *     summary: Delete a domain from the database
+ *     summary: Deactivate a domain
  *     tags: [Domains]
  *     security:
  *       - api_key: []
@@ -115,15 +164,22 @@ router.post('/bulk', requireApiKey, (req, res) => {
  *         required: true
  *         schema:
  *           type: string
+ *         example: zyvenox.my.id
+ *     responses:
+ *       200:
+ *         description: Domain removed from the local allowlist
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
  */
 router.delete('/:domain', requireApiKey, (req, res) => {
   const { domain } = req.params;
   try {
-    const result = queries.deleteDomain.run({ domain: domain.toLowerCase() });
-    if (result.changes === 0) return res.status(404).json({ error: 'Domain not found' });
-    res.json({ success: true, message: `Domain ${domain} removed` });
+    queries.deleteDomain.run({ domain: domain.toLowerCase().trim() });
+    res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to remove domain' });
+    res.status(500).json({ error: 'Failed' });
   }
 });
 

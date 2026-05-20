@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="robots" content="noindex, nofollow">
+    <title>ZYVENOX API Reference</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link href="/styles.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <style>
+        :root { --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .dark {
+            --bg-base: 240, 10%, 4%;
+            --bg-surface: 240, 8%, 10%;
+            --bg-surface-elevated: 240, 6%, 15%;
+            --border: 240, 5%, 18%, 0.5;
+            --text-primary: 240, 5%, 96%;
+            --text-muted: 240, 4%, 65%;
+            --card-glow: rgba(99, 102, 241, 0.15);
+        }
+        html:not(.dark) {
+            --bg-base: 210, 60%, 88%;
+            --bg-surface: 210, 55%, 93%;
+            --bg-surface-elevated: 210, 50%, 97%;
+            --border: 210, 40%, 70%, 0.6;
+            --text-primary: 213, 70%, 10%;
+            --text-muted: 213, 30%, 35%;
+            --card-glow: rgba(99, 102, 241, 0.15);
+        }
+
+        body {
+            background-color: hsl(var(--bg-base));
+            background-image:
+                radial-gradient(circle at 5% 5%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 95% 85%, rgba(245, 158, 11, 0.07) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.04) 0%, transparent 50%);
+            color: hsl(var(--text-primary));
+            transition: var(--transition-smooth);
+        }
+        html:not(.dark) body {
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.20) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
+        }
+
+        .glass-panel {
+            background-color: hsla(var(--bg-surface), 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid hsla(var(--border));
+        }
+        html:not(.dark) .glass-panel {
+            background-color: hsla(210, 60%, 90%, 0.45) !important;
+            border-color: hsla(215, 50%, 75%, 0.35) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+        }
+
+        .glass-card {
+            background-color: hsl(var(--bg-surface));
+            border: 1px solid hsla(var(--border));
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            transition: var(--transition-smooth);
+        }
+        html:not(.dark) .glass-card {
+            background-color: hsla(210, 55%, 95%, 0.55) !important;
+            border-color: hsla(215, 50%, 72%, 0.30) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 40px var(--card-glow);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.25); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+
+        /* Method badges (per DESIGN.md) */
+        .method-badge {
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            min-width: 58px;
+            justify-content: center;
+        }
+        .method-get    { background: rgba(34, 197, 94, 0.15);  color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .method-post   { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .method-delete { background: rgba(239, 68, 68, 0.15);  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .method-put    { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .method-patch  { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+        /* Path text */
+        .endpoint-path {
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            color: hsl(var(--text-primary));
+            word-break: break-all;
+        }
+
+        /* Code blocks */
+        pre.code-block {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 12.5px;
+            line-height: 1.6;
+            background-color: hsl(var(--bg-surface-elevated));
+            border: 1px solid hsla(var(--border));
+            border-radius: 12px;
+            padding: 14px 16px;
+            overflow-x: auto;
+            color: hsl(var(--text-primary));
+        }
+        html:not(.dark) pre.code-block {
+            background-color: hsla(210, 50%, 96%, 0.7) !important;
+        }
+
+        /* JSON syntax highlight */
+        .json-key    { color: #818cf8; }
+        .json-string { color: #34d399; }
+        .json-number { color: #fbbf24; }
+        .json-bool   { color: #f472b6; }
+        .json-null   { color: #94a3b8; font-style: italic; }
+        html:not(.dark) .json-key    { color: #4f46e5; }
+        html:not(.dark) .json-string { color: #047857; }
+        html:not(.dark) .json-number { color: #b45309; }
+        html:not(.dark) .json-bool   { color: #be185d; }
+        html:not(.dark) .json-null   { color: #475569; }
+
+        /* Sidebar nav items */
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: hsl(var(--text-muted));
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .sidebar-link:hover {
+            background-color: hsla(var(--bg-surface-elevated), 0.6);
+            color: hsl(var(--text-primary));
+            border-color: hsla(var(--border));
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(99, 102, 241, 0.05));
+            color: hsl(var(--text-primary));
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        .sidebar-link .method-badge {
+            min-width: 50px;
+            font-size: 9px;
+            padding: 2px 7px;
+        }
+
+        /* Anchor scroll offset for sticky header */
+        .endpoint-anchor { scroll-margin-top: 100px; }
+
+        /* Tag heading */
+        .tag-heading {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: hsl(var(--text-muted));
+            opacity: 0.8;
+        }
+
+        /* Param table */
+        .param-table { width: 100%; font-size: 12.5px; border-collapse: collapse; }
+        .param-table th {
+            text-align: left;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: hsl(var(--text-muted));
+            padding: 8px 12px;
+            border-bottom: 1px solid hsla(var(--border));
+        }
+        .param-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid hsla(var(--border));
+            vertical-align: top;
+        }
+        .param-table tr:last-child td { border-bottom: none; }
+        .param-name { font-family: 'Space Grotesk', monospace; font-weight: 700; color: hsl(var(--text-primary)); }
+        .param-type { font-family: 'Space Grotesk', monospace; font-size: 11px; color: #818cf8; }
+        .param-required { color: #ef4444; font-size: 10px; font-weight: 700; margin-left: 6px; }
+
+        /* Light mode high-contrast text */
+        html:not(.dark) .text-slate-400,
+        html:not(.dark) .text-slate-300 { color: hsl(var(--text-muted)) !important; }
+        html:not(.dark) h1, html:not(.dark) h2, html:not(.dark) h3 { color: hsl(var(--text-primary)) !important; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen selection:bg-brand-500/20 selection:text-brand-500">
+
+<!-- Top header -->
+<header class="sticky top-0 z-30 glass-panel border-b border-slate-200/10">
+    <div class="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="h-9 w-9 rounded-full overflow-hidden border border-brand-500/30">
+                <img src="/favicon.png" alt="ZYVENOX" class="h-full w-full object-cover" />
+            </div>
+            <div class="border-l border-slate-200/20 pl-3">
+                <h1 class="text-sm font-extrabold tracking-tight font-mono text-brand-500 leading-tight">T-MAIL</h1>
+                <p class="text-[9px] uppercase font-bold tracking-widest text-slate-400 opacity-60">API Reference</p>
+            </div>
+        </a>
+
+        <div class="flex items-center gap-3">
+            <a href="/" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-500/5 border border-slate-200/10 hover:border-brand-500 hover:text-brand-500 text-xs font-semibold text-slate-400 transition-all">
+                <span class="material-symbols-outlined text-base">inbox</span>
+                <span>Inbox</span>
+            </a>
+            <button id="theme-toggle" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-500/5 border border-slate-200/10 hover:border-brand-500 hover:text-brand-500 transition-all cursor-pointer" title="Switch Theme">
+                <span id="theme-toggle-icon" class="material-symbols-outlined text-lg">dark_mode</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main layout -->
+<div class="max-w-[1400px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+
+    <!-- Sidebar -->
+    <aside class="lg:sticky lg:top-[88px] lg:self-start lg:max-h-[calc(100vh-110px)] lg:overflow-y-auto pr-1">
+        <div class="mb-4">
+            <div class="flex items-center bg-slate-500/5 border border-slate-200/10 rounded-xl overflow-hidden focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-all">
+                <span class="material-symbols-outlined text-slate-400 ml-3 text-base">search</span>
+                <input id="endpoint-filter" type="text" placeholder="Filter endpoints..." class="flex-1 bg-transparent border-none text-xs px-3 py-2.5 outline-none focus:ring-0 text-slate-300" />
+            </div>
+        </div>
+        <nav id="sidebar-nav" class="space-y-5"></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="space-y-6 min-w-0">
+        <!-- Hero -->
+        <section class="glass-card rounded-2xl p-6 md:p-8">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-500 font-mono">Live · v1.0.0</span>
+            </div>
+            <h2 id="api-title" class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">ZYVENOX API</h2>
+            <p id="api-description" class="text-sm text-slate-400 leading-relaxed max-w-2xl"></p>
+            <div class="mt-5 flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-slate-400 font-mono">Base URL</span>
+                <select id="server-select" class="font-mono text-brand-500 px-3 py-1.5 rounded-lg bg-slate-500/5 border border-slate-200/10 hover:border-brand-500 cursor-pointer outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"></select>
+                <code id="base-url" class="font-mono text-brand-500 px-3 py-1.5 rounded-lg bg-slate-500/5 border border-slate-200/10"></code>
+                <button id="copy-base" class="text-slate-400 hover:text-brand-500 px-2 py-1.5 rounded-lg hover:bg-slate-500/5 transition-all" title="Copy base URL">
+                    <span class="material-symbols-outlined text-base">content_copy</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Endpoint cards -->
+        <div id="endpoints-container" class="space-y-10"></div>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="hidden glass-card rounded-2xl p-10 text-center">
+            <span class="material-symbols-outlined text-5xl text-slate-400 opacity-40">search_off</span>
+            <p class="mt-3 text-sm text-slate-400">No endpoints match your filter.</p>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="glass-card rounded-2xl p-10 text-center">
+            <span class="material-symbols-outlined text-4xl text-brand-500 animate-spin">progress_activity</span>
+            <p class="mt-3 text-xs text-slate-400 font-mono uppercase tracking-widest">Loading API spec...</p>
+        </div>
+    </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden glass-panel rounded-xl px-4 py-3 text-xs font-semibold shadow-lg shadow-brand-500/20 border-brand-500/40"></div>
+
+<script>
+const html = document.documentElement;
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-toggle-icon');
+
+// ─── Theme (mirrors index.html behavior) ─────────────────────────────────
+function applyTheme() {
+    const saved = localStorage.getItem('cfmail_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'light') {
+        html.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+    } else if (saved === 'dark' || prefersDark) {
+        html.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+    } else {
+        html.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+    }
+}
+applyTheme();
+themeToggle.addEventListener('click', () => {
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+        localStorage.setItem('cfmail_theme', 'light');
+    } else {
+        html.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+        localStorage.setItem('cfmail_theme', 'dark');
+    }
+});
+
+// ─── Toast ───────────────────────────────────────────────────────────────
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.add('hidden'), 2200);
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function highlightJson(obj) {
+    const str = JSON.stringify(obj, null, 2);
+    return escapeHtml(str)
+        .replace(/&quot;([^&]+?)&quot;(\s*:)/g, '<span class="json-key">&quot;$1&quot;</span>$2')
+        .replace(/:\s*&quot;([^&]*?)&quot;/g, ': <span class="json-string">&quot;$1&quot;</span>')
+        .replace(/:\s*(-?\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+        .replace(/:\s*(true|false)/g, ': <span class="json-bool">$1</span>')
+        .replace(/:\s*null/g, ': <span class="json-null">null</span>');
+}
+
+function schemaToExample(schema, components, depth = 0) {
+    if (!schema || depth > 6) return null;
+    if (schema.$ref) {
+        const refName = schema.$ref.split('/').pop();
+        const resolved = components?.schemas?.[refName];
+        return resolved ? schemaToExample(resolved, components, depth + 1) : null;
+    }
+    if (schema.example !== undefined) return schema.example;
+    if (schema.type === 'object' || schema.properties) {
+        const obj = {};
+        for (const [k, v] of Object.entries(schema.properties || {})) {
+            obj[k] = schemaToExample(v, components, depth + 1);
+        }
+        return obj;
+    }
+    if (schema.type === 'array') return [schemaToExample(schema.items, components, depth + 1)];
+    if (schema.type === 'string')  return schema.example ?? 'string';
+    if (schema.type === 'integer' || schema.type === 'number') return schema.example ?? 0;
+    if (schema.type === 'boolean') return false;
+    return null;
+}
+
+function methodClass(method) {
+    return 'method-' + method.toLowerCase();
+}
+
+function slugify(method, path) {
+    return (method + '-' + path).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+// Single-quote a value for safe shell embedding
+function shq(v) {
+    return "'" + String(v).replace(/'/g, "'\\''") + "'";
+}
+
+function buildCurlExample(method, path, params, body, baseAbs, security) {
+    // Substitute path params with examples
+    let resolvedPath = path;
+    const queryParts = [];
+    for (const p of params || []) {
+        const ex = p.example ?? p.schema?.example ?? `{${p.name}}`;
+        if (p.in === 'path') {
+            resolvedPath = resolvedPath.replace(new RegExp(`\\{${p.name}\\}`, 'g'), encodeURIComponent(ex));
+        } else if (p.in === 'query') {
+            queryParts.push(`${encodeURIComponent(p.name)}=${encodeURIComponent(ex)}`);
+        }
+    }
+    const qs = queryParts.length ? '?' + queryParts.join('&') : '';
+    const url = baseAbs + resolvedPath + qs;
+
+    const lines = [];
+    if (method.toLowerCase() === 'get') {
+        lines.push(`curl ${shq(url)}`);
+    } else {
+        lines.push(`curl -X ${method.toUpperCase()} ${shq(url)} \\`);
+    }
+    if (security) lines.push(`  -H 'X-API-Key: $API_KEY' \\`);
+    if (body) {
+        const bodyExample = body.example ?? schemaToExample(body.schema);
+        if (bodyExample !== null && bodyExample !== undefined) {
+            lines.push(`  -H 'Content-Type: application/json' \\`);
+            lines.push(`  -d ${shq(JSON.stringify(bodyExample))}`);
+        }
+    }
+    // Strip trailing backslash from last line
+    let curl = lines.join('\n').replace(/ \\$/, '');
+
+    return `
+        <div class="mt-5">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">cURL Example</h4>
+                <button class="text-slate-400 hover:text-brand-500 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md hover:bg-slate-500/5 transition-all flex items-center gap-1" data-copy-curl="${escapeHtml(curl)}">
+                    <span class="material-symbols-outlined" style="font-size:14px;">content_copy</span>
+                    Copy
+                </button>
+            </div>
+            <pre class="code-block">${escapeHtml(curl)}</pre>
+        </div>`;
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────
+async function loadSpec() {
+    try {
+        const res = await fetch('/docs/swagger.json');
+        if (!res.ok) throw new Error('Failed to load API spec');
+        const spec = await res.json();
+        renderSpec(spec);
+    } catch (err) {
+        document.getElementById('loader').innerHTML = `
+            <span class="material-symbols-outlined text-4xl text-red-500">error</span>
+            <p class="mt-3 text-xs text-red-400 font-mono">${escapeHtml(err.message)}</p>`;
+    }
+}
+
+function renderSpec(spec) {
+    const info = spec.info || {};
+    document.getElementById('api-title').textContent = info.title || 'API Reference';
+    document.getElementById('api-description').textContent = info.description || '';
+    const servers = (spec.servers && spec.servers.length > 0) ? spec.servers : [{ url: '/api', description: 'Current host' }];
+    const select = document.getElementById('server-select');
+    const baseEl = document.getElementById('base-url');
+
+    const resolveBase = (url) => /^https?:\/\//i.test(url) ? url : window.location.origin + url;
+
+    select.innerHTML = servers.map((s, i) =>
+        `<option value="${i}">${escapeHtml(s.description || 'Server')}</option>`
+    ).join('');
+
+    const updateBase = () => {
+        const picked = servers[select.value] || servers[0];
+        baseEl.textContent = resolveBase(picked.url);
+    };
+    updateBase();
+    select.addEventListener('change', updateBase);
+
+    document.getElementById('copy-base').addEventListener('click', () => {
+        navigator.clipboard.writeText(baseEl.textContent).then(() => showToast('Base URL copied'));
+    });
+
+    // Group endpoints by tag
+    const grouped = {};
+    for (const [path, methods] of Object.entries(spec.paths || {})) {
+        for (const [method, op] of Object.entries(methods)) {
+            if (!['get','post','put','patch','delete'].includes(method)) continue;
+            const tag = (op.tags && op.tags[0]) || 'Uncategorized';
+            grouped[tag] = grouped[tag] || [];
+            grouped[tag].push({ path, method, op, anchor: slugify(method, path) });
+        }
+    }
+
+    renderSidebar(grouped);
+    renderEndpoints(grouped, spec.components);
+    setupFilter();
+    setupActiveLink();
+
+    document.getElementById('loader').remove();
+}
+
+function renderSidebar(grouped) {
+    const nav = document.getElementById('sidebar-nav');
+    nav.innerHTML = '';
+    for (const [tag, items] of Object.entries(grouped)) {
+        const section = document.createElement('div');
+        section.dataset.tag = tag;
+        section.innerHTML = `
+            <h3 class="tag-heading mb-2 px-2">${escapeHtml(tag)}</h3>
+            <div class="space-y-1">
+                ${items.map(it => `
+                    <a href="#${it.anchor}" data-anchor="${it.anchor}" data-path="${escapeHtml(it.path)}" data-summary="${escapeHtml(it.op.summary || '')}" class="sidebar-link">
+                        <span class="method-badge ${methodClass(it.method)}">${it.method.toUpperCase()}</span>
+                        <span class="truncate font-mono text-[11.5px]">${escapeHtml(it.path)}</span>
+                    </a>
+                `).join('')}
+            </div>`;
+        nav.appendChild(section);
+    }
+}
+
+function renderEndpoints(grouped, components) {
+    const container = document.getElementById('endpoints-container');
+    container.innerHTML = '';
+    for (const [tag, items] of Object.entries(grouped)) {
+        const section = document.createElement('section');
+        section.dataset.tag = tag;
+        section.className = 'space-y-5';
+        section.innerHTML = `<h2 class="text-xs font-extrabold tracking-[0.2em] uppercase text-brand-500 pl-1">${escapeHtml(tag)}</h2>`;
+        for (const it of items) {
+            section.appendChild(renderEndpointCard(it, components));
+        }
+        container.appendChild(section);
+    }
+}
+
+function renderEndpointCard({ path, method, op, anchor }, components) {
+    const card = document.createElement('article');
+    card.className = 'glass-card rounded-2xl p-5 md:p-6 fade-in endpoint-anchor';
+    card.id = anchor;
+    card.dataset.path = path;
+    card.dataset.summary = op.summary || '';
+
+    const params = op.parameters || [];
+    const body = op.requestBody?.content?.['application/json'];
+    const responses = op.responses || {};
+    const security = op.security && op.security.length > 0;
+
+    // Build parameter table
+    let paramsHtml = '';
+    if (params.length > 0) {
+        paramsHtml = `
+            <div class="mt-5">
+                <h4 class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Parameters</h4>
+                <div class="rounded-xl border border-slate-200/10 overflow-hidden">
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th><th>In</th><th>Type</th><th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${params.map(p => `
+                            <tr>
+                                <td>
+                                    <span class="param-name">${escapeHtml(p.name)}</span>
+                                    ${p.required ? '<span class="param-required">required</span>' : ''}
+                                </td>
+                                <td><span class="text-xs text-slate-400 font-mono">${escapeHtml(p.in)}</span></td>
+                                <td><span class="param-type">${escapeHtml(p.schema?.type || 'string')}</span></td>
+                                <td><span class="text-xs text-slate-400">${escapeHtml(p.description || '')}</span></td>
+                            </tr>
+                        `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+    }
+
+    // Request body
+    let bodyHtml = '';
+    if (body) {
+        const example = body.example ?? schemaToExample(body.schema, components);
+        bodyHtml = `
+            <div class="mt-5">
+                <h4 class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Request Body <span class="text-slate-500 font-normal normal-case tracking-normal ml-1">application/json</span></h4>
+                ${example !== null ? `<pre class="code-block">${highlightJson(example)}</pre>` : '<p class="text-xs text-slate-400">No schema defined.</p>'}
+            </div>`;
+    }
+
+    // Responses
+    let responsesHtml = '';
+    const respEntries = Object.entries(responses);
+    if (respEntries.length > 0) {
+        responsesHtml = `
+            <div class="mt-5">
+                <h4 class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Responses</h4>
+                <div class="space-y-2">
+                    ${respEntries.map(([code, resp]) => {
+                        const codeNum = parseInt(code, 10);
+                        const cls = isNaN(codeNum) || codeNum >= 500 ? 'method-delete'
+                                  : codeNum >= 400 ? 'method-post'
+                                  : codeNum >= 300 ? 'method-put'
+                                  : 'method-get';
+                        const json = resp.content?.['application/json'];
+                        const respExample = json?.example ?? schemaToExample(json?.schema, components);
+                        const exampleBlock = respExample !== null && respExample !== undefined
+                            ? `<pre class="code-block mt-2 ml-[58px]">${highlightJson(respExample)}</pre>`
+                            : '';
+                        return `
+                            <div>
+                                <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-500/5 border border-slate-200/10">
+                                    <span class="method-badge ${cls}" style="min-width:46px;">${escapeHtml(code)}</span>
+                                    <span class="text-xs text-slate-300 leading-relaxed pt-0.5">${escapeHtml(resp.description || '')}</span>
+                                </div>
+                                ${exampleBlock}
+                            </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+    }
+
+    // cURL example
+    const baseAbs = document.getElementById('base-url')?.textContent || '/api';
+    const curlHtml = buildCurlExample(method, path, params, body, baseAbs, security);
+
+    // Security
+    let securityHtml = '';
+    if (security) {
+        securityHtml = `
+            <div class="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-1">
+                <span class="material-symbols-outlined" style="font-size:13px;">key</span>
+                Requires X-API-Key
+            </div>`;
+    }
+
+    card.innerHTML = `
+        <div class="flex items-start gap-3 flex-wrap">
+            <span class="method-badge ${methodClass(method)}">${method.toUpperCase()}</span>
+            <code class="endpoint-path">${escapeHtml(path)}</code>
+            <button class="ml-auto text-slate-400 hover:text-brand-500 p-1 rounded-md hover:bg-slate-500/5 transition-all" data-copy-path="${escapeHtml(path)}" title="Copy path">
+                <span class="material-symbols-outlined text-base">content_copy</span>
+            </button>
+        </div>
+        ${op.summary ? `<h3 class="mt-3 text-base font-bold tracking-tight">${escapeHtml(op.summary)}</h3>` : ''}
+        ${op.description ? `<p class="mt-1 text-sm text-slate-400 leading-relaxed">${escapeHtml(op.description)}</p>` : ''}
+        ${securityHtml}
+        ${paramsHtml}
+        ${bodyHtml}
+        ${responsesHtml}
+        ${curlHtml}
+    `;
+
+    card.querySelector('[data-copy-path]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(path).then(() => showToast('Path copied'));
+    });
+
+    const copyCurlBtn = card.querySelector('[data-copy-curl]');
+    if (copyCurlBtn) {
+        copyCurlBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(copyCurlBtn.dataset.copyCurl).then(() => showToast('cURL copied'));
+        });
+    }
+
+    return card;
+}
+
+// ─── Filter ──────────────────────────────────────────────────────────────
+function setupFilter() {
+    const input = document.getElementById('endpoint-filter');
+    const empty = document.getElementById('empty-state');
+    input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        document.querySelectorAll('#endpoints-container > section').forEach(section => {
+            let sectionVisible = 0;
+            section.querySelectorAll('article').forEach(card => {
+                const hay = ((card.dataset.path || '') + ' ' + (card.dataset.summary || '')).toLowerCase();
+                const match = hay.includes(q);
+                card.style.display = match ? '' : 'none';
+                if (match) sectionVisible++;
+            });
+            section.style.display = sectionVisible > 0 ? '' : 'none';
+            visibleCount += sectionVisible;
+        });
+
+        document.querySelectorAll('#sidebar-nav > div').forEach(group => {
+            let groupVisible = 0;
+            group.querySelectorAll('a').forEach(link => {
+                const hay = ((link.dataset.path || '') + ' ' + (link.dataset.summary || '')).toLowerCase();
+                const match = hay.includes(q);
+                link.style.display = match ? '' : 'none';
+                if (match) groupVisible++;
+            });
+            group.style.display = groupVisible > 0 ? '' : 'none';
+        });
+
+        empty.classList.toggle('hidden', visibleCount > 0);
+    });
+}
+
+// ─── Active sidebar link via IntersectionObserver ────────────────────────
+function setupActiveLink() {
+    const links = new Map();
+    document.querySelectorAll('#sidebar-nav a[data-anchor]').forEach(a => links.set(a.dataset.anchor, a));
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                links.forEach(l => l.classList.remove('active'));
+                const link = links.get(entry.target.id);
+                if (link) link.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+
+    document.querySelectorAll('.endpoint-anchor').forEach(el => observer.observe(el));
+}
+
+loadSpec();
+</script>
+</body>
+</html>

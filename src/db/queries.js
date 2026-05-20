@@ -3,7 +3,11 @@ const db = require('./database');
 // Queries
 const queries = {
   getDomains: db.prepare('SELECT domain FROM domains WHERE active = 1'),
-  upsertDomain: db.prepare('INSERT INTO domains (domain, active) VALUES (@domain, 1) ON CONFLICT(domain) DO UPDATE SET active = 1'),
+  upsertDomain: db.prepare(`
+    INSERT INTO domains (domain, label, active)
+    VALUES (@domain, @label, 1)
+    ON CONFLICT(domain) DO UPDATE SET active = 1, label = excluded.label
+  `),
   deleteDomain: db.prepare('DELETE FROM domains WHERE domain = @domain'),
   
   insertEmail: db.prepare(`
@@ -50,17 +54,31 @@ const queries = {
     WHERE expires_at <= @now
   `),
 
-  insertToken: db.prepare(`
-    INSERT INTO tokens (token, address, created_at, expires_at)
-    VALUES (@token, @address, @created_at, @expires_at)
+  insertMailbox: db.prepare(`
+    INSERT INTO mailboxes (address, created_at, expires_at)
+    VALUES (@address, @created_at, @expires_at)
+    ON CONFLICT(address) DO UPDATE SET expires_at = excluded.expires_at
   `),
 
-  getAddressByToken: db.prepare(`
-    SELECT address FROM tokens WHERE token = @token
+  getMailbox: db.prepare(`
+    SELECT * FROM mailboxes WHERE address = @address
   `),
 
-  // Token deletion is no longer automated to keep tokens permanent.
-  // cleanupExpiredTokens: ...
+  deleteMailbox: db.prepare(`
+    DELETE FROM mailboxes WHERE address = @address
+  `),
+
+  updateMailboxExpiry: db.prepare(`
+    UPDATE mailboxes SET expires_at = @expires_at WHERE address = @address
+  `),
+
+  updateEmailsExpiryByAddress: db.prepare(`
+    UPDATE emails SET expires_at = @expires_at WHERE address = @address
+  `),
+
+  cleanupExpiredMailboxes: db.prepare(`
+    DELETE FROM mailboxes WHERE expires_at <= @now
+  `)
 };
 
 module.exports = queries;
