@@ -80,8 +80,19 @@ function calculateExpiry(durationMin) {
   let duration = parseInt(durationMin, 10);
   if (isNaN(duration) || duration < 5) duration = 60; // default 1 hour
   if (duration > 360) duration = 360; // max 6 hours
-  
+
   return new Date(Date.now() + duration * 60 * 1000).toISOString();
+}
+
+// Single source of truth for default TTL when an address auto-registers
+// without an explicit duration (driven by EMAIL_TTL_HOURS in .env, capped
+// at 6 hours so it can't exceed the explicit-duration upper bound).
+function getDefaultExpiryISO() {
+  const hours = parseFloat(process.env.EMAIL_TTL_HOURS || '1');
+  let minutes = isNaN(hours) ? 60 : hours * 60;
+  if (minutes < 5) minutes = 5;
+  if (minutes > 360) minutes = 360;
+  return new Date(Date.now() + minutes * 60 * 1000).toISOString();
 }
 
 /**
@@ -333,8 +344,8 @@ router.get('/address/:address', inboxPollLimiter, (req, res) => {
   try {
     const mailbox = queries.getMailbox.get({ address });
 
-    // Fallback: If address was generated outside this API or directly, auto-register it with a default 24h expiry
-    let expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    // Fallback: If address was generated outside this API or directly, auto-register it with the default TTL (EMAIL_TTL_HOURS, capped at 6 h)
+    let expires_at = getDefaultExpiryISO();
     if (mailbox) {
       expires_at = mailbox.expires_at;
       // If mailbox is already expired, return 404

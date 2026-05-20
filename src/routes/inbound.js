@@ -73,9 +73,13 @@ router.post('/', async (req, res) => {
         return res.status(410).json({ error: 'Mailbox has expired' });
       }
     } else {
-      // Auto-register unregistered direct recipient with default 24h expiry
-      const ttlHours = parseInt(process.env.EMAIL_TTL_HOURS || '24', 10);
-      const expiresAt = new Date(now.getTime() + ttlHours * 60 * 60 * 1000);
+      // Auto-register unregistered direct recipient using EMAIL_TTL_HOURS,
+      // capped at 6 h so it can't exceed the explicit-duration upper bound.
+      const hours = parseFloat(process.env.EMAIL_TTL_HOURS || '1');
+      let minutes = isNaN(hours) ? 60 : hours * 60;
+      if (minutes < 5) minutes = 5;
+      if (minutes > 360) minutes = 360;
+      const expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
       expiresAtStr = expiresAt.toISOString();
       queries.insertMailbox.run({
         address,
