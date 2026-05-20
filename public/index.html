@@ -592,44 +592,37 @@
 
                     <!-- Slide-in Email Detail Viewer (Hidden by default) -->
                     <aside id="email-detail-panel" class="hidden flex-1 rounded-2xl border border-slate-200/10 bg-slate-500/5 flex flex-col h-full overflow-hidden animate-[slideUp_0.3s_ease-out]">
-                        <!-- Detail Header -->
-                        <header class="p-5 border-b border-slate-200/10 flex flex-col gap-4 shrink-0 bg-slate-500/5">
-                            <div class="flex items-center justify-between">
-                                <button id="close-email-detail" class="p-1.5 hover:bg-slate-500/10 rounded-lg text-slate-400 hover:text-brand-500 transition-colors flex items-center">
+                        <!-- Compact Detail Header (toolbar + inline meta) -->
+                        <header class="px-4 pt-3 pb-2 border-b border-slate-200/10 shrink-0 bg-slate-500/5">
+                            <!-- Toolbar row: back / subject / actions -->
+                            <div class="flex items-center gap-2 min-w-0">
+                                <button id="close-email-detail" class="shrink-0 p-1.5 hover:bg-slate-500/10 rounded-lg text-slate-400 hover:text-brand-500 transition-colors flex items-center" title="Back">
                                     <span class="material-symbols-outlined text-lg">arrow_back</span>
                                 </button>
-                                <span class="text-[10px] font-black uppercase font-mono tracking-widest text-brand-500 bg-brand-500/10 px-2.5 py-1 rounded-md">Secure Message Viewer</span>
+                                <h2 id="detail-subject" class="flex-1 min-w-0 text-sm md:text-base font-bold tracking-tight truncate">Verify your account</h2>
+                                <button id="detail-copy" class="shrink-0 p-1.5 text-slate-400 hover:text-brand-500 hover:bg-slate-500/10 rounded-lg transition-colors flex items-center" title="Copy raw JSON">
+                                    <span class="material-symbols-outlined text-base">terminal</span>
+                                </button>
+                                <button id="detail-delete" class="shrink-0 p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors flex items-center" title="Delete message">
+                                    <span class="material-symbols-outlined text-base">delete</span>
+                                </button>
                             </div>
-                            
-                            <div class="space-y-3">
-                                <h2 id="detail-subject" class="text-base md:text-lg font-black tracking-tight line-clamp-2">Verify your account</h2>
-                                <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 p-3.5 rounded-xl bg-slate-500/5 border border-slate-200/10 text-xs">
-                                    <span class="font-extrabold uppercase tracking-wider text-slate-400 font-mono">From:</span>
-                                    <div class="flex items-center gap-1.5 truncate text-slate-200">
-                                        <span id="detail-from-name" class="font-bold">...</span>
-                                        <span id="detail-from-addr" class="text-slate-400 truncate">&lt;...&gt;</span>
-                                    </div>
-                                    <span class="font-extrabold uppercase tracking-wider text-slate-400 font-mono">Date:</span>
-                                    <div id="detail-date" class="text-slate-300 font-mono">...</div>
+                            <!-- Inline meta row: From + Date -->
+                            <div class="flex items-center gap-3 mt-1.5 pl-9 text-[11px] text-slate-400 font-mono min-w-0">
+                                <div class="flex items-center gap-1.5 min-w-0 flex-1 truncate">
+                                    <span class="text-slate-500 shrink-0">from</span>
+                                    <span id="detail-from-name" class="font-bold text-slate-300 truncate">...</span>
+                                    <span id="detail-from-addr" class="text-slate-500 truncate">&lt;...&gt;</span>
                                 </div>
+                                <div id="detail-date" class="shrink-0 text-slate-500">...</div>
                             </div>
                         </header>
 
                         <!-- Safe IFrame Sandboxed Viewer -->
-                        <div class="flex-1 p-5 overflow-hidden flex flex-col relative h-full">
-                            <div class="flex-1 bg-[var(--iframe-bg)] rounded-xl overflow-hidden shadow-inner relative block mb-4 border border-slate-200/10 transition-colors">
-                                <iframe id="detail-iframe" class="absolute inset-0 w-full h-full border-none" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin" srcdoc="<div></div>"></iframe>
+                        <div class="flex-1 p-3 md:p-4 overflow-hidden">
+                            <div class="h-full bg-[var(--iframe-bg)] rounded-xl overflow-hidden shadow-inner border border-slate-200/10 transition-colors">
+                                <iframe id="detail-iframe" class="w-full h-full border-none block" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin" srcdoc="<div></div>"></iframe>
                             </div>
-                            
-                            <!-- Viewer Actions -->
-                            <footer class="pt-4 border-t border-slate-200/10 flex items-center justify-between shrink-0">
-                                <button id="detail-delete" class="px-4 py-2 rounded-xl text-rose-500 border border-rose-500/20 hover:bg-rose-500/10 hover:text-rose-600 text-xs font-bold transition-all flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-sm">delete</span> Delete Message
-                                </button>
-                                <button id="detail-copy" class="px-4 py-2 rounded-xl text-slate-400 border border-slate-200/10 hover:border-brand-500 hover:text-brand-500 text-xs font-bold transition-all flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-sm">terminal</span> Copy Raw JSON
-                                </button>
-                            </footer>
                         </div>
                     </aside>
                 </div>
