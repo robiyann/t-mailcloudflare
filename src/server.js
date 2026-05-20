@@ -72,5 +72,19 @@ app.listen(PORT, '127.0.0.1', () => {
   if (!API_KEY) {
     console.warn('⚠️  WARNING: API_KEY is not set! Add API_KEY=your_secret to .env to protect your API.');
   }
+
+  // Warm Cloudflare zones cache so domain validation works immediately
+  const { getCloudflareDomains } = require('./utils/cloudflare');
+  getCloudflareDomains().then((domains) => {
+    if (domains && domains.length > 0) {
+      console.log(`✅ Cloudflare zones warmed: ${domains.length} domains`);
+    } else {
+      console.warn('⚠️  No Cloudflare zones loaded — falling back to DOMAINS env var only.');
+    }
+  }).catch(() => { /* logged inside util */ });
+
+  // Refresh cache every 5 minutes so newly-added Cloudflare zones become usable
+  // without restarting the server.
+  setInterval(() => { getCloudflareDomains().catch(() => {}); }, 5 * 60 * 1000);
 });
 

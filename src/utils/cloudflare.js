@@ -48,4 +48,8 @@ async function getCloudflareDomains() {
   }
 }
 
-module.exports = { getCloudflareDomains };
+module.exports = { getCloudflareDomains, getCachedCloudflareDomains };
+
+function getCachedCloudflareDomains() {
+  return cachedDomains;
+}

@@ -3,6 +3,15 @@ const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const queries = require('../db/queries');
+const { getCloudflareDomains, getCachedCloudflareDomains } = require('../utils/cloudflare');
+
+// Combine Cloudflare cache + DB so generation accepts any zone we've seen
+function getActiveDomains() {
+  const set = new Set();
+  for (const d of getCachedCloudflareDomains() || []) set.add(d);
+  for (const row of queries.getDomains.all()) set.add(row.domain);
+  return [...set];
+}
 
 // ─── Rate Limiters ───────────────────────────────────────────────────────────
 // DDoS & abuse mitigation
@@ -23,17 +32,10 @@ const inboxPollLimiter = rateLimit({
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Helper to validate domain
+// Helper to validate domain (Cloudflare cache primary, DB fallback)
 function isValidDomain(domain) {
-  // Try dynamic Cloudflare domains or fallback to local db domains
-  const cfDomains = require('../utils/cloudflare').getCloudflareDomains();
-  // Since getCloudflareDomains is async and returns cache instantly, we can resolve it.
-  // But wait! getCloudflareDomains was written as async returning cachedDomains directly.
-  // To avoid blocking, we can read active domains from SQLite or check if it matches in the DB.
-  // To be safe and fast, let's allow it if it exists in DB OR if it's currently stored in the cache.
-  // Let's query SQLite:
-  const dbDomains = queries.getDomains.all().map(d => d.domain);
-  return dbDomains.includes(domain);
+  if (!domain) return false;
+  return getActiveDomains().includes(domain);
 }
 
 // Helper to check for ReDoS patterns in custom Regex
@@ -61,7 +63,7 @@ function isSafeRegex(pattern) {
 // ─── Round-Robin Domain Rotator ──────────────────────────────────────────────
 let _rrCounter = 0;
 function getNextDomainRoundRobin() {
-  const domains = queries.getDomains.all().map(d => d.domain);
+  const domains = getActiveDomains();
   if (!domains || domains.length === 0) throw new Error('No active domains available');
   const domain = domains[_rrCounter % domains.length];
   _rrCounter++;
