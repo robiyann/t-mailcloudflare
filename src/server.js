@@ -10,6 +10,12 @@ const app = express();
 const PORT = process.env.PORT || 3721;
 const API_KEY = process.env.API_KEY;
 
+// Server binds to 127.0.0.1 only; any traffic must come through a local
+// reverse proxy (Cloudflare Tunnel / nginx / Caddy). Trust the loopback
+// hop so X-Forwarded-For is honored and express-rate-limit keys on the
+// real client IP instead of 127.0.0.1.
+app.set('trust proxy', 'loopback');
+
 // ─── Security & CORS ──────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: false,
