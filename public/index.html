@@ -563,31 +563,34 @@
 
         <!-- Canvas Body (Double-Column Workspace) -->
         <div class="flex-1 overflow-hidden p-4 sm:p-6 md:p-8 pt-0 max-w-[1200px] w-full mx-auto relative">
-            <div class="grid grid-cols-1 grid-rows-[auto_1fr] lg:grid-cols-12 lg:grid-rows-1 gap-4 lg:gap-6 h-full relative min-h-0">
+            <div class="grid grid-cols-1 grid-rows-[1fr_auto] lg:grid-cols-12 lg:grid-rows-1 gap-4 lg:gap-6 h-full relative min-h-0">
 
-                <!-- Email List Panel (4 Columns) -->
-                <div class="lg:col-span-4 flex flex-col gap-3 lg:h-full overflow-hidden max-h-[35vh] lg:max-h-none min-h-0">
+                <!-- Email List Panel (4 Columns) — gets the major share on mobile -->
+                <div class="lg:col-span-4 flex flex-col gap-3 lg:h-full overflow-hidden min-h-0 order-1">
                     <div class="flex items-center justify-between shrink-0">
                         <h3 class="text-xs font-extrabold uppercase tracking-widest text-slate-400 font-mono">Incoming Messages</h3>
                         <span id="inbox-count" class="px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-500 text-[10px] font-black font-mono">0 emails</span>
                     </div>
 
                     <!-- Scrollable Email Card List -->
-                    <div id="email-list" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-2">
+                    <div id="email-list" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-2 min-h-0">
                         <!-- email items injected dynamically -->
                     </div>
                 </div>
 
                 <!-- Viewer / Detail Content Area (8 Columns) -->
-                <div class="lg:col-span-8 flex flex-col overflow-hidden relative min-h-0 lg:h-full">
+                <div class="lg:col-span-8 flex flex-col overflow-hidden relative min-h-0 lg:h-full order-2">
 
                     <!-- Empty State Placeholder -->
-                    <div id="empty-state" class="flex-1 rounded-2xl border border-slate-200/10 bg-slate-500/5 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-0">
-                        <div class="w-20 h-20 sm:w-32 sm:h-32 rounded-full bg-brand-500/10 flex items-center justify-center mb-4 sm:mb-6 float-animation glow-accent shrink-0">
-                            <span class="material-symbols-outlined text-3xl sm:text-4xl text-brand-500 pulse-effect">mail</span>
+                    <!-- Mobile: compact horizontal banner. Desktop: centered hero. -->
+                    <div id="empty-state" class="rounded-2xl border border-slate-200/10 bg-slate-500/5 flex flex-row lg:flex-col items-center lg:justify-center gap-3 lg:gap-6 p-3 sm:p-4 lg:p-8 text-left lg:text-center lg:flex-1 lg:h-full">
+                        <div class="w-12 h-12 lg:w-32 lg:h-32 rounded-full bg-brand-500/10 flex items-center justify-center float-animation glow-accent shrink-0">
+                            <span class="material-symbols-outlined text-2xl lg:text-4xl text-brand-500 pulse-effect">mail</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold mb-1 tracking-tight">Listening for emails...</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 max-w-sm">Give this email address to any website. Verification codes and messages will show up here instantly.</p>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm lg:text-lg font-bold tracking-tight">Listening for emails...</h3>
+                            <p class="text-[11px] lg:text-xs text-slate-400 lg:max-w-sm leading-snug mt-0.5">Verification codes and messages will show up here instantly.</p>
+                        </div>
                     </div>
 
                     <!-- Slide-in Email Detail Viewer (Hidden by default) -->
